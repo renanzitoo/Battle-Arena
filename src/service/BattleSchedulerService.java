@@ -13,6 +13,7 @@ public class BattleSchedulerService {
 
     private int totalResources;
     private int availableResources;
+    private final Object lock = new Object();
 
     public BattleSchedulerService(int totalResources) {
         this.totalResources = totalResources;
@@ -24,43 +25,53 @@ public class BattleSchedulerService {
     }
 
     public void addBattleRequest(BattleRequest request){
-        battleQueue.add(request);
+        synchronized (lock) {
+            battleQueue.add(request);
+            lock.notifyAll();
+        }
+
         System.out.println("Request added to scheduler: " + request);
     }
 
     public void tryStartNextBattle(){
-        if(battleQueue.isEmpty()) {
-            System.out.println("No battle awaiting.");
-            return;
-        }
+        synchronized (lock) {
 
-        BattleRequest request = battleQueue.peek();
+            if (battleQueue.isEmpty()) {
+                System.out.println("No battle awaiting.");
+                return;
+            }
 
-        int requiredResources = request.getBattleType().getResourceCost();
+            BattleRequest request = battleQueue.peek();
 
-        if(availableResources >= requiredResources){
-            battleQueue.poll();
+            int requiredResources = request.getBattleType().getResourceCost();
 
-            availableResources -= requiredResources;
+            if (availableResources >= requiredResources) {
+                battleQueue.poll();
 
-            Battle battle = new Battle(request);
+                availableResources -= requiredResources;
 
-            BattleThread battleThread = new BattleThread(battle,this);
+                Battle battle = new Battle(request);
 
-            battleThread.start();
-            System.out.println("Scheduler started a battle");
-            System.out.println("Available resources: " + availableResources);
-        } else {
-            System.out.println("Unavailable resources to start: " + request);
+                BattleThread battleThread = new BattleThread(battle, this);
+
+                battleThread.start();
+                System.out.println("Scheduler started a battle");
+                System.out.println("Available resources: " + availableResources);
+            } else {
+                System.out.println("Unavailable resources to start: " + request);
+            }
         }
     }
 
     public void releaseResources(Battle battle) {
-        int resources = battle.getRequest().getBattleType().getResourceCost();
+        synchronized (lock) {
+            int resources = battle.getRequest().getBattleType().getResourceCost();
 
-        availableResources += resources;
-        System.out.println("Free resources: " + resources);
-        System.out.println("Resources available: "+ availableResources);
+            availableResources += resources;
+            System.out.println("Free resources: " + resources);
+            System.out.println("Resources available: " + availableResources);
+            lock.notifyAll();
+        }
     }
 
     public boolean hasBattlesWaiting(){
