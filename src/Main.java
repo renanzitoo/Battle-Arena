@@ -1,9 +1,11 @@
 import model.*;
+import service.BattleSchedulerService;
 import service.MatchmakingService;
 
 public class Main {
     public static void main(String[] args) {
         MatchmakingService matchmakingService = new MatchmakingService();
+        BattleSchedulerService schedulerService = new BattleSchedulerService(10);
 
         Player p1 = new Player(1, "xxDarkMage");
         Player p2 = new Player(2, "zzSuperKiller");
@@ -17,6 +19,12 @@ public class Main {
         BattleRequest requisition =
                 matchmakingService.tryCreateBattle(BattleType.RANKED_MATCH);
 
-        System.out.println(requisition);
+        if(requisition != null){
+            schedulerService.addBattleRequest(requisition);
+        }
+
+        schedulerService.tryStartNextBattle();
+
+        System.out.println("Main continues!");
     }
 }
