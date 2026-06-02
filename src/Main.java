@@ -12,77 +12,58 @@ public class Main {
     private static final Random random = new Random();
     private static int playerId = 1;
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws InterruptedException {
         MatchmakingService matchmakingService = new MatchmakingService();
-
-        BattleSchedulerService schedulerService =
-                new BattleSchedulerService(10);
+        BattleSchedulerService schedulerService = new BattleSchedulerService(4);
 
         MatchmakingThread matchmakingThread =
-                new MatchmakingThread(
-                        matchmakingService,
-                        schedulerService
-                );
+                new MatchmakingThread(matchmakingService, schedulerService);
 
         SchedulerThread schedulerThread =
-                new SchedulerThread(
-                        schedulerService
-                );
+                new SchedulerThread(schedulerService);
 
         MonitorThread monitorThread =
-                new MonitorThread(
-                        matchmakingService,
-                        schedulerService
-                );
+                new MonitorThread(matchmakingService, schedulerService);
 
         matchmakingThread.start();
         schedulerThread.start();
         monitorThread.start();
 
-        System.out.println("=== SISTEMA INICIADO ===");
+        System.out.println("=== SIMULAÇÃO INICIADA ===");
 
-        while (true) {
+        long simulationStart = System.currentTimeMillis();
+        long simulationDuration = 30000;
 
-            Player player = new Player(
-                    playerId++,
-                    "Player_" + playerId
-            );
+        while (System.currentTimeMillis() - simulationStart < simulationDuration) {
+            Player player = new Player(playerId, "Player_" + playerId);
 
-            BattleType battleType =
-                    BattleType.values()[
-                            random.nextInt(
-                                    BattleType.values().length
-                            )
-                            ];
+            BattleType battleType = BattleType.values()[
+                    random.nextInt(BattleType.values().length)
+                    ];
 
-            QueueRequest request =
-                    new QueueRequest(
-                            player,
-                            battleType
-                    );
+            QueueRequest request = new QueueRequest(player, battleType);
 
             matchmakingService.addToQueue(request);
 
-            System.out.println(
-                    "[NOVO JOGADOR] " +
-                            player.getName() +
-                            " entrou na fila " +
-                            battleType
-            );
+            System.out.println("[NOVO JOGADOR] " +
+                    player.getName() +
+                    " entrou na fila " +
+                    battleType);
 
-            try {
-
-                // jogador chega entre 0.5 e 3 segundos
-
-                Thread.sleep(
-                        random.nextInt(2500) + 500
-                );
-
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
-            }
+            playerId++;
+            Thread.sleep(random.nextInt(1000) + 300);
         }
+
+        System.out.println("\n=== ENCERRANDO SIMULAÇÃO ===");
+
+        matchmakingThread.stopMatchmaking();
+        schedulerThread.stopScheduler();
+        monitorThread.stopMonitor();
+
+        matchmakingThread.join();
+        schedulerThread.join();
+        monitorThread.join();
+
+        System.out.println("=== SIMULAÇÃO FINALIZADA ===");
     }
 }
