@@ -9,7 +9,7 @@ public class Main {
 
         Player p1 = new Player(1, "Renan");
         Player p2 = new Player(2, "Carlos");
-        Player p3 = new Player(3, "Ana");
+        Player p3 = new Player(3, "Leticia");
         Player p4 = new Player(4, "Bruno");
         Player p5 = new Player(5, "Julia");
         Player p6 = new Player(6, "Marcos");
