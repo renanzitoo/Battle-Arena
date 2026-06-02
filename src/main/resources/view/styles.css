@@ -1,0 +1,135 @@
+.root {
+    -fx-base: #010A13;
+    -fx-background: #010A13;
+    -fx-control-inner-background: #010A13;
+}
+
+.header {
+    -fx-background-color: linear-gradient(to bottom, #0A1428, #010A13);
+    -fx-border-color: #C89B3C;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 10;
+}
+
+.header-title {
+    -fx-font-family: "Beaufort for LOL", "Arial Black";
+    -fx-font-size: 24px;
+    -fx-fill: #C89B3C;
+    -fx-effect: dropshadow(three-pass-box, rgba(200, 155, 60, 0.4), 10, 0, 0, 0);
+}
+
+.panel-title {
+    -fx-font-family: "Spiegel", "Arial";
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #F0E6D2;
+    -fx-padding: 5;
+    -fx-border-color: #C89B3C;
+    -fx-border-width: 0 0 1 0;
+}
+
+.card {
+    -fx-background-color: #091428;
+    -fx-border-color: #785A28;
+    -fx-border-width: 1;
+    -fx-padding: 10;
+    -fx-spacing: 5;
+}
+
+.card:hover {
+    -fx-border-color: #C89B3C;
+    -fx-effect: dropshadow(three-pass-box, rgba(200, 155, 60, 0.2), 5, 0, 0, 0);
+}
+
+.metric-value {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #C8AA6E;
+}
+
+.metric-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: #A09B8C;
+}
+
+.table-view {
+    -fx-background-color: transparent;
+    -fx-border-color: #785A28;
+}
+
+.table-view .column-header {
+    -fx-background-color: #1E2328;
+    -fx-border-color: #785A28;
+    -fx-border-width: 0 1 1 0;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #C8AA6E;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: #010A13;
+    -fx-text-fill: #F0E6D2;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #0A1428;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #1E2328;
+    -fx-border-color: #C89B3C;
+}
+
+.progress-bar .bar {
+    -fx-background-color: linear-gradient(to right, #C89B3C, #F0E6D2);
+    -fx-background-insets: 0;
+}
+
+.progress-bar .track {
+    -fx-background-color: #010A13;
+    -fx-border-color: #785A28;
+    -fx-border-radius: 0;
+}
+
+.thread-indicator {
+    -fx-shape: "M 10 20 A 10 10 0 1 1 10.001 20 Z";
+    -fx-min-width: 12;
+    -fx-min-height: 12;
+}
+
+.thread-running { -fx-background-color: #24FF00; }
+.thread-waiting { -fx-background-color: #FFD600; }
+.thread-stopped { -fx-background-color: #FF0000; }
+
+.event-log {
+    -fx-background-color: #010A13;
+    -fx-border-color: #785A28;
+    -fx-control-inner-background: #010A13;
+}
+
+.event-log .list-cell {
+    -fx-text-fill: #A09B8C;
+    -fx-font-family: "Consolas", "Monospace";
+    -fx-font-size: 11px;
+    -fx-background-color: transparent;
+}
+
+.event-log .list-cell:filled:hover {
+    -fx-text-fill: #F0E6D2;
+}
+
+.button-lol {
+    -fx-background-color: #1E2328;
+    -fx-border-color: #C89B3C;
+    -fx-text-fill: #C89B3C;
+    -fx-font-weight: bold;
+    -fx-padding: 8 20;
+    -fx-cursor: hand;
+}
+
+.button-lol:hover {
+    -fx-background-color: #32281E;
+    -fx-text-fill: #F0E6D2;
+}

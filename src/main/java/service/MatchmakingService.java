@@ -17,11 +17,22 @@ public class MatchmakingService {
     private Queue<QueueRequest> casualDuelQueue;
     private Queue<QueueRequest> tournamentDuelQueue;
 
+    private java.util.function.Consumer<String> eventLogger;
+
     public MatchmakingService(Metrics metrics){
         this.metrics = metrics;
         this.casualDuelQueue = new LinkedList<>();
         this.rankedDuelQueue = new LinkedList<>();
         this.tournamentDuelQueue = new LinkedList<>();
+    }
+
+    public void setEventLogger(java.util.function.Consumer<String> logger) {
+        this.eventLogger = logger;
+    }
+
+    private void log(String msg) {
+        System.out.println(msg);
+        if (eventLogger != null) eventLogger.accept(msg);
     }
 
     public void addToQueue(QueueRequest request){
@@ -41,8 +52,7 @@ public class MatchmakingService {
             }
 
             metrics.incrementTotalPlayers();
-
-            System.out.println("Player entered the queue: "+ request);
+            log("[QUEUE] " + request.getPlayer().getName() + " entered " + request.getBattleType());
         }
     }
 
@@ -57,7 +67,7 @@ public class MatchmakingService {
                 BattleRequest request =
                         new BattleRequest(playerOne, playerTwo);
 
-                System.out.println("Battle Begin: " + request);
+                log("[MATCH] Battle formed: " + playerOne.getPlayer().getName() + " vs " + playerTwo.getPlayer().getName());
 
                 return request;
             }
@@ -111,6 +121,28 @@ public class MatchmakingService {
             System.out.println("Ranked: " + rankedDuelQueue.size());
             System.out.println("Tournaments: " + tournamentDuelQueue.size());
         }
+    }
+
+    public Queue<QueueRequest> getCasualDuelQueue() {
+        synchronized (lock) {
+            return new LinkedList<>(casualDuelQueue);
+        }
+    }
+
+    public Queue<QueueRequest> getRankedDuelQueue() {
+        synchronized (lock) {
+            return new LinkedList<>(rankedDuelQueue);
+        }
+    }
+
+    public Queue<QueueRequest> getTournamentDuelQueue() {
+        synchronized (lock) {
+            return new LinkedList<>(tournamentDuelQueue);
+        }
+    }
+
+    public Metrics getMetrics() {
+        return metrics;
     }
 
     public boolean hasPlayersWaiting() {

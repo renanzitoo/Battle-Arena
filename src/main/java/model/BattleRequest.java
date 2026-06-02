@@ -1,16 +1,23 @@
 package model;
 
 public class BattleRequest {
+    private static int nextId = 1;
+    private final int battleId;
     private QueueRequest playerOneRequest;
     private QueueRequest playerTwoRequest;
     private BattleType battleType;
     private long creationTime;
 
     public BattleRequest(QueueRequest playerOneRequest, QueueRequest playerTwoRequest) {
+        this.battleId = nextId++;
         this.playerOneRequest = playerOneRequest;
         this.playerTwoRequest = playerTwoRequest;
         this.battleType = playerOneRequest.getBattleType();
         this.creationTime = System.currentTimeMillis();
+    }
+
+    public int getBattleId() {
+        return battleId;
     }
 
     public QueueRequest getPlayerOneRequest() {

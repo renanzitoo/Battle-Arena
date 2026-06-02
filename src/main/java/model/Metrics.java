@@ -55,6 +55,22 @@ public class Metrics {
         return cumulativeUtilization / utilizationSamples;
     }
 
+    public synchronized int getTotalPlayers() {
+        return totalPlayers;
+    }
+
+    public synchronized int getAbandonedPlayers() {
+        return abandonedPlayers;
+    }
+
+    public synchronized int getStartedBattles() {
+        return startedBattles;
+    }
+
+    public synchronized int getFinishedBattles() {
+        return finishedBattles;
+    }
+
     public synchronized void printFinalReport() {
         System.out.println("\n===== FINAL REPORT =====");
         System.out.println("Total players: " + totalPlayers);

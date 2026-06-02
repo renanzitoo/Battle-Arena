@@ -19,6 +19,8 @@ public class BattleSchedulerService {
     private int availableResources;
     private final Object lock = new Object();
 
+    private java.util.function.Consumer<String> eventLogger;
+
     public BattleSchedulerService(int totalResources, Metrics metrics) {
         this.totalResources = totalResources;
         this.availableResources = totalResources;
@@ -28,13 +30,22 @@ public class BattleSchedulerService {
         this.activeBattles = new ArrayList<>();
     }
 
+    public void setEventLogger(java.util.function.Consumer<String> logger) {
+        this.eventLogger = logger;
+    }
+
+    private void log(String msg) {
+        System.out.println(msg);
+        if (eventLogger != null) eventLogger.accept(msg);
+    }
+
     public void addBattleRequest(BattleRequest request) {
         synchronized (lock) {
             battleQueue.add(request);
             lock.notifyAll();
         }
 
-        System.out.println("Request added to scheduler: " + request);
+        log("[SCHEDULER] Request received: Battle #" + request.getBattleId());
     }
 
     public void tryStartNextBattle() {
@@ -70,9 +81,7 @@ public class BattleSchedulerService {
                 BattleThread battleThread = new BattleThread(battle, this);
                 battleThread.start();
 
-                System.out.println("Scheduler started a battle");
-                System.out.println("Selected priority: " + request.calculatePriorityWithAging());
-                System.out.println("Available resources: " + availableResources);
+                log("[START] Battle #" + request.getBattleId() + " started. Resources used: " + requiredResources);
             }
         }
     }
@@ -95,8 +104,7 @@ public class BattleSchedulerService {
 
             metrics.incrementFinishedBattles();
 
-            System.out.println("Free resources: " + resources);
-            System.out.println("Resources available: " + availableResources);
+            log("[FINISH] Battle #" + battle.getRequest().getBattleId() + " finished. Resources freed: " + resources);
 
             lock.notifyAll();
         }
@@ -132,6 +140,28 @@ public class BattleSchedulerService {
     public boolean hasActiveBattles() {
         synchronized (lock) {
             return !activeBattles.isEmpty();
+        }
+    }
+
+    public List<BattleRequest> getBattleQueue() {
+        synchronized (lock) {
+            return new ArrayList<>(battleQueue);
+        }
+    }
+
+    public List<Battle> getActiveBattles() {
+        synchronized (lock) {
+            return new ArrayList<>(activeBattles);
+        }
+    }
+
+    public int getTotalResources() {
+        return totalResources;
+    }
+
+    public int getAvailableResources() {
+        synchronized (lock) {
+            return availableResources;
         }
     }
     public void printBattleQueue() {
