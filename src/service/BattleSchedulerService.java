@@ -8,10 +8,9 @@ import thread.BattleThread;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.PriorityQueue;
 
 public class BattleSchedulerService {
-    private PriorityQueue<BattleRequest> battleQueue;
+    private List<BattleRequest> battleQueue;
     private List<Battle> activeBattles;
 
     private Metrics metrics;
@@ -25,10 +24,7 @@ public class BattleSchedulerService {
         this.availableResources = totalResources;
         this.metrics = metrics;
 
-        this.battleQueue = new PriorityQueue<>(
-                Comparator.comparingInt(BattleRequest::calculatePriorityWithAging).reversed()
-        );
-
+        this.battleQueue = new ArrayList<>();
         this.activeBattles = new ArrayList<>();
     }
 
@@ -47,12 +43,16 @@ public class BattleSchedulerService {
                 return;
             }
 
-            BattleRequest request = battleQueue.peek();
+            BattleRequest request = getHighestPriorityRequest();
+
+            if (request == null) {
+                return;
+            }
 
             int requiredResources = request.getBattleType().getResourceCost();
 
             if (availableResources >= requiredResources) {
-                battleQueue.poll();
+                battleQueue.remove(request);
 
                 availableResources -= requiredResources;
 
@@ -71,9 +71,16 @@ public class BattleSchedulerService {
                 battleThread.start();
 
                 System.out.println("Scheduler started a battle");
+                System.out.println("Selected priority: " + request.calculatePriorityWithAging());
                 System.out.println("Available resources: " + availableResources);
             }
         }
+    }
+
+    private BattleRequest getHighestPriorityRequest() {
+        return battleQueue.stream()
+                .max(Comparator.comparingInt(BattleRequest::calculatePriorityWithAging))
+                .orElse(null);
     }
 
     public void releaseResources(Battle battle) {
@@ -95,29 +102,18 @@ public class BattleSchedulerService {
         }
     }
 
-//    public void removeExpiredBattleRequest() {
-//        synchronized (lock) {
-//            battleQueue.removeIf(request -> {
-//                boolean expired = request.shouldBeCancelled();
-//
-//                if (expired) {
-//                    System.out.println("Battle request expired: " + request);
-//                }
-//
-//                return expired;
-//            });
-//        }
-//    }
-
     public void printSchedulerStatus() {
         synchronized (lock) {
+            double currentUtilization = getCurrentUtilization();
+            metrics.updateUtilization(currentUtilization);
+
             System.out.println("\n===== SCHEDULER STATUS =====");
             System.out.println("Battles awaiting: " + battleQueue.size());
             System.out.println("Active battles: " + activeBattles.size());
             System.out.println("Total resources: " + totalResources);
             System.out.println("Available resources: " + availableResources);
             System.out.println("Using resources: " + (totalResources - availableResources));
-            System.out.printf("System utilization: %.2f%%\n", getCurrentUtilization());
+            System.out.printf("System utilization: %.2f%%\n", currentUtilization);
         }
     }
 
@@ -136,6 +132,29 @@ public class BattleSchedulerService {
     public boolean hasActiveBattles() {
         synchronized (lock) {
             return !activeBattles.isEmpty();
+        }
+    }
+    public void printBattleQueue() {
+        synchronized (lock) {
+
+            System.out.println("\n===== BATTLE QUEUE =====");
+
+            if (battleQueue.isEmpty()) {
+                System.out.println("Queue is empty.");
+                return;
+            }
+
+            battleQueue.stream()
+                    .sorted(
+                            Comparator.comparingInt(
+                                    BattleRequest::calculatePriorityWithAging
+                            ).reversed()
+                    )
+                    .forEach(request -> System.out.println(
+                            request +
+                                    " | Priority: " +
+                                    request.calculatePriorityWithAging()
+                    ));
         }
     }
 }

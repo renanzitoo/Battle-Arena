@@ -20,7 +20,7 @@ public class Main {
                 new MatchmakingService(metrics);
 
         BattleSchedulerService schedulerService =
-                new BattleSchedulerService(10, metrics);
+                new BattleSchedulerService(4, metrics);
 
         MatchmakingThread matchmakingThread =
                 new MatchmakingThread(
@@ -77,6 +77,9 @@ public class Main {
                             + battleType
                             + " queue."
             );
+
+            System.out.println("QUEUE");
+            schedulerService.printBattleQueue();
 
             playerId++;
 

@@ -7,6 +7,8 @@ public class Metrics {
     private int finishedBattles;
 
     private long totalWaitingTime;
+    private double cumulativeUtilization;
+    private int utilizationSamples;
 
     public synchronized void incrementTotalPlayers() {
         totalPlayers++;
@@ -25,6 +27,11 @@ public class Metrics {
         finishedBattles++;
     }
 
+    public synchronized void updateUtilization(double currentUtilization) {
+        cumulativeUtilization += currentUtilization;
+        utilizationSamples++;
+    }
+
     public synchronized double getAverageWaitingTime() {
         if (startedBattles == 0) {
             return 0;
@@ -41,13 +48,21 @@ public class Metrics {
         return (double) abandonedPlayers / totalPlayers * 100;
     }
 
+    public synchronized double getAverageUtilization() {
+        if (utilizationSamples == 0) {
+            return 0;
+        }
+        return cumulativeUtilization / utilizationSamples;
+    }
+
     public synchronized void printFinalReport() {
-        System.out.println("\n===== RELATÓRIO FINAL =====");
-        System.out.println("Total de jogadores: " + totalPlayers);
-        System.out.println("Jogadores que abandonaram: " + abandonedPlayers);
-        System.out.println("Batalhas iniciadas: " + startedBattles);
-        System.out.println("Batalhas finalizadas: " + finishedBattles);
-        System.out.println("Tempo médio de espera: " + getAverageWaitingTime() + "ms");
-        System.out.println("Taxa de abandono: " + getAbandonmentRate() + "%");
+        System.out.println("\n===== FINAL REPORT =====");
+        System.out.println("Total players: " + totalPlayers);
+        System.out.println("Abandoned players: " + abandonedPlayers);
+        System.out.println("Started battles: " + startedBattles);
+        System.out.println("Finished battles: " + finishedBattles);
+        System.out.printf("Average waiting time: %.2fms\n", getAverageWaitingTime());
+        System.out.printf("Abandonment rate: %.2f%%\n", getAbandonmentRate());
+        System.out.printf("Average system utilization: %.2f%%\n", getAverageUtilization());
     }
 }
