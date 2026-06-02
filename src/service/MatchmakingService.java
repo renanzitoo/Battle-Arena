@@ -2,6 +2,7 @@ package service;
 
 import model.BattleRequest;
 import model.BattleType;
+import model.Metrics;
 import model.QueueRequest;
 
 import java.util.Iterator;
@@ -11,11 +12,13 @@ import java.util.Queue;
 
 public class MatchmakingService {
     private final Object lock = new Object();
+    private Metrics metrics;
     private Queue<QueueRequest> rankedDuelQueue;
     private Queue<QueueRequest> casualDuelQueue;
     private Queue<QueueRequest> tournamentDuelQueue;
 
-    public MatchmakingService(){
+    public MatchmakingService(Metrics metrics){
+        this.metrics = metrics;
         this.casualDuelQueue = new LinkedList<>();
         this.rankedDuelQueue = new LinkedList<>();
         this.tournamentDuelQueue = new LinkedList<>();
@@ -36,6 +39,8 @@ public class MatchmakingService {
                     tournamentDuelQueue.add(request);
                     break;
             }
+
+            metrics.incrementTotalPlayers();
 
             System.out.println("Player entered the queue: "+ request);
         }
@@ -93,6 +98,7 @@ public class MatchmakingService {
 
             if(request.shouldAbandonQueue()){
                 System.out.println("Player abandoned the queue: " + request);
+                metrics.incrementAbandonedPlayers();
                 iterator.remove();
             }
         }
@@ -104,6 +110,14 @@ public class MatchmakingService {
             System.out.println("Casual duels: " + casualDuelQueue.size());
             System.out.println("Ranked: " + rankedDuelQueue.size());
             System.out.println("Tournaments: " + tournamentDuelQueue.size());
+        }
+    }
+
+    public boolean hasPlayersWaiting() {
+        synchronized (lock){
+            return !casualDuelQueue.isEmpty()
+                    || !rankedDuelQueue.isEmpty()
+                    || !tournamentDuelQueue.isEmpty();
         }
     }
 }

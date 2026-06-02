@@ -1,9 +1,9 @@
 package model;
 
 public enum BattleType {
-    CASUAL_MATCH(1,1,5000,15000),
-    RANKED_MATCH (2,2,10000,20000),
-    TOURNAMENT_MATCH(3,3, 20000,30000);
+    CASUAL_MATCH(1,1,5000,10000),
+    RANKED_MATCH (2,2,8000,12000),
+    TOURNAMENT_MATCH(3,3, 12000,15000);
 
     private final int priority;
     private final int resourceCost;

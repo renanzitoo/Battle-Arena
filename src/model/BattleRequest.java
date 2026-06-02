@@ -48,9 +48,6 @@ public class BattleRequest {
         return battleType.getPriority() + agingBonus;
     }
 
-    public boolean shouldBeCancelled() {
-        return calculateWaitingTime() > battleType.getMaxWaitingDurationInMs();
-    }
 
     @Override
     public String toString() {

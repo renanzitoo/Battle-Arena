@@ -13,48 +13,97 @@ public class Main {
     private static int playerId = 1;
 
     public static void main(String[] args) throws InterruptedException {
-        MatchmakingService matchmakingService = new MatchmakingService();
-        BattleSchedulerService schedulerService = new BattleSchedulerService(4);
+
+        Metrics metrics = new Metrics();
+
+        MatchmakingService matchmakingService =
+                new MatchmakingService(metrics);
+
+        BattleSchedulerService schedulerService =
+                new BattleSchedulerService(3, metrics);
 
         MatchmakingThread matchmakingThread =
-                new MatchmakingThread(matchmakingService, schedulerService);
+                new MatchmakingThread(
+                        matchmakingService,
+                        schedulerService
+                );
 
         SchedulerThread schedulerThread =
-                new SchedulerThread(schedulerService);
+                new SchedulerThread(
+                        schedulerService
+                );
 
         MonitorThread monitorThread =
-                new MonitorThread(matchmakingService, schedulerService);
+                new MonitorThread(
+                        matchmakingService,
+                        schedulerService
+                );
 
         matchmakingThread.start();
         schedulerThread.start();
         monitorThread.start();
 
-        System.out.println("=== SIMULAÇÃO INICIADA ===");
+        System.out.println("\n===== SIMULATION STARTED =====\n");
 
-        long simulationStart = System.currentTimeMillis();
-        long simulationDuration = 30000;
+        long simulationTime = 30000;
+        long startTime = System.currentTimeMillis();
 
-        while (System.currentTimeMillis() - simulationStart < simulationDuration) {
-            Player player = new Player(playerId, "Player_" + playerId);
+        while (System.currentTimeMillis() - startTime < simulationTime) {
 
-            BattleType battleType = BattleType.values()[
-                    random.nextInt(BattleType.values().length)
-                    ];
+            Player player = new Player(
+                    playerId,
+                    "Player_" + playerId
+            );
 
-            QueueRequest request = new QueueRequest(player, battleType);
+            BattleType battleType =
+                    BattleType.values()[
+                            random.nextInt(
+                                    BattleType.values().length
+                            )
+                            ];
+
+            QueueRequest request =
+                    new QueueRequest(
+                            player,
+                            battleType
+                    );
 
             matchmakingService.addToQueue(request);
 
-            System.out.println("[NOVO JOGADOR] " +
-                    player.getName() +
-                    " entrou na fila " +
-                    battleType);
+            System.out.println(
+                    "[NEW PLAYER] "
+                            + player.getName()
+                            + " entered "
+                            + battleType
+                            + " queue."
+            );
 
             playerId++;
-            Thread.sleep(random.nextInt(1000) + 300);
+
+            Thread.sleep(
+                    random.nextInt(1200) + 300
+            );
         }
 
-        System.out.println("\n=== ENCERRANDO SIMULAÇÃO ===");
+        System.out.println(
+                "\n===== PLAYER GENERATION FINISHED ====="
+        );
+
+        System.out.println(
+                "Waiting for remaining players to abandon queue and battles to finish...\n"
+        );
+
+        while (
+                matchmakingService.hasPlayersWaiting()
+                        || schedulerService.hasBattlesWaiting()
+                        || schedulerService.hasActiveBattles()
+        ) {
+            Thread.sleep(1000);
+        }
+
+        System.out.println(
+                "\n===== NO MORE PLAYERS OR BATTLES ====="
+        );
 
         matchmakingThread.stopMatchmaking();
         schedulerThread.stopScheduler();
@@ -64,6 +113,14 @@ public class Main {
         schedulerThread.join();
         monitorThread.join();
 
-        System.out.println("=== SIMULAÇÃO FINALIZADA ===");
+        System.out.println(
+                "\n===== FINAL REPORT ====="
+        );
+
+        metrics.printFinalReport();
+
+        System.out.println(
+                "\n===== SIMULATION FINISHED ====="
+        );
     }
 }
