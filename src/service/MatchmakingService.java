@@ -4,6 +4,7 @@ import model.BattleRequest;
 import model.BattleType;
 import model.QueueRequest;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -69,5 +70,31 @@ public class MatchmakingService {
             default:
                 throw new IllegalArgumentException("Tipo de batalha inválido.");
         }
+    }
+
+    public void removeAbandonedRequests(){
+        removeAbandonedFromQueue(casualDuelQueue);
+        removeAbandonedFromQueue(rankedDuelQueue);
+        removeAbandonedFromQueue(tournamentDuelQueue);
+    }
+
+    public void removeAbandonedFromQueue(Queue<QueueRequest> queue){
+        Iterator<QueueRequest> iterator = queue.iterator();
+
+        while(iterator.hasNext()){
+            QueueRequest request = iterator.next();
+
+            if(request.shouldAbandonQueue()){
+                System.out.println("Player abandoned the queue: " + request);
+                iterator.remove();
+            }
+        }
+    }
+
+    public void printQueuesStatus() {
+        System.out.println("\n===== Queue status =====");
+        System.out.println("Casual duels: " + casualDuelQueue.size());
+        System.out.println("Ranked: " + rankedDuelQueue.size());
+        System.out.println("Tournaments: " + tournamentDuelQueue.size());
     }
 }
