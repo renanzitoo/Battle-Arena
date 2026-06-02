@@ -74,6 +74,29 @@ public class BattleSchedulerService {
         }
     }
 
+    public void removeExpiredBattleRequest(){
+        synchronized (lock){
+            battleQueue.removeIf(request -> {
+                boolean expired = request.shouldBeCancelled();
+
+                if(expired){
+                    System.out.println("Battle request expired: " + request);
+                }
+                return expired;
+            });
+        }
+    }
+
+    public void printSchedulerStatus() {
+        synchronized (lock) {
+            System.out.println("\n===== SCHEDULER STATUS =====");
+            System.out.println("Battles awaiting: " + battleQueue.size());
+            System.out.println("Total resources: " + totalResources);
+            System.out.println("Available resources: " + availableResources);
+            System.out.println("Using resources: " + (totalResources - availableResources));
+        }
+    }
+
     public boolean hasBattlesWaiting(){
         return !battleQueue.isEmpty();
     }

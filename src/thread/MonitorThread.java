@@ -20,7 +20,7 @@ public class MonitorThread extends Thread{
     public void run() {
         while (running) {
             matchmakingService.removeAbandonedRequests();
-            schedulerService.removeExpiredBattleRequisitions();
+            schedulerService.removeExpiredBattleRequest();
 
             matchmakingService.printQueuesStatus();
             schedulerService.printSchedulerStatus();

@@ -1,70 +1,88 @@
 import model.*;
 import service.BattleSchedulerService;
 import service.MatchmakingService;
+import thread.MatchmakingThread;
+import thread.MonitorThread;
+import thread.SchedulerThread;
+
+import java.util.Random;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+
+    private static final Random random = new Random();
+    private static int playerId = 1;
+
+    public static void main(String[] args) {
+
         MatchmakingService matchmakingService = new MatchmakingService();
-        BattleSchedulerService schedulerService = new BattleSchedulerService(5);
 
-        Player p1 = new Player(1, "Renan");
-        Player p2 = new Player(2, "Carlos");
-        Player p3 = new Player(3, "Leticia");
-        Player p4 = new Player(4, "Bruno");
-        Player p5 = new Player(5, "Julia");
-        Player p6 = new Player(6, "Marcos");
+        BattleSchedulerService schedulerService =
+                new BattleSchedulerService(10);
 
-        QueueRequest r1 = new QueueRequest(p1, BattleType.RANKED_MATCH);
-        QueueRequest r2 = new QueueRequest(p2, BattleType.RANKED_MATCH);
+        MatchmakingThread matchmakingThread =
+                new MatchmakingThread(
+                        matchmakingService,
+                        schedulerService
+                );
 
-        QueueRequest r3 = new QueueRequest(p3, BattleType.TOURNAMENT_MATCH);
-        QueueRequest r4 = new QueueRequest(p4, BattleType.TOURNAMENT_MATCH);
+        SchedulerThread schedulerThread =
+                new SchedulerThread(
+                        schedulerService
+                );
 
-        QueueRequest r5 = new QueueRequest(p5, BattleType.CASUAL_MATCH);
-        QueueRequest r6 = new QueueRequest(p6, BattleType.CASUAL_MATCH);
+        MonitorThread monitorThread =
+                new MonitorThread(
+                        matchmakingService,
+                        schedulerService
+                );
 
-        matchmakingService.addToQueue(r1);
-        matchmakingService.addToQueue(r2);
-        matchmakingService.addToQueue(r3);
-        matchmakingService.addToQueue(r4);
-        matchmakingService.addToQueue(r5);
-        matchmakingService.addToQueue(r6);
+        matchmakingThread.start();
+        schedulerThread.start();
+        monitorThread.start();
 
-        BattleRequest rankedBattle =
-                matchmakingService.tryCreateBattle(BattleType.RANKED_MATCH);
+        System.out.println("=== SISTEMA INICIADO ===");
 
-        BattleRequest tournamentBattle =
-                matchmakingService.tryCreateBattle(BattleType.TOURNAMENT_MATCH);
+        while (true) {
 
-        BattleRequest quickBattle =
-                matchmakingService.tryCreateBattle(BattleType.CASUAL_MATCH);
+            Player player = new Player(
+                    playerId++,
+                    "Player_" + playerId
+            );
 
-        if (rankedBattle != null) {
-            schedulerService.addBattleRequest(rankedBattle);
+            BattleType battleType =
+                    BattleType.values()[
+                            random.nextInt(
+                                    BattleType.values().length
+                            )
+                            ];
+
+            QueueRequest request =
+                    new QueueRequest(
+                            player,
+                            battleType
+                    );
+
+            matchmakingService.addToQueue(request);
+
+            System.out.println(
+                    "[NOVO JOGADOR] " +
+                            player.getName() +
+                            " entrou na fila " +
+                            battleType
+            );
+
+            try {
+
+                // jogador chega entre 0.5 e 3 segundos
+
+                Thread.sleep(
+                        random.nextInt(2500) + 500
+                );
+
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
-
-        if (tournamentBattle != null) {
-            schedulerService.addBattleRequest(tournamentBattle);
-        }
-
-        if (quickBattle != null) {
-            schedulerService.addBattleRequest(quickBattle);
-        }
-
-        System.out.println("\nTentando iniciar batalhas...\n");
-
-        schedulerService.tryStartNextBattle();
-        schedulerService.tryStartNextBattle();
-        schedulerService.tryStartNextBattle();
-
-        System.out.println("\nMain continua rodando enquanto as batalhas acontecem...\n");
-
-        Thread.sleep(25000);
-
-        System.out.println("\nTentando iniciar novamente após algumas batalhas finalizarem...\n");
-
-        schedulerService.tryStartNextBattle();
-        schedulerService.tryStartNextBattle();
-        schedulerService.tryStartNextBattle();
     }
 }
