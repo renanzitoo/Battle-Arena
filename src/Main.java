@@ -20,7 +20,7 @@ public class Main {
                 new MatchmakingService(metrics);
 
         BattleSchedulerService schedulerService =
-                new BattleSchedulerService(3, metrics);
+                new BattleSchedulerService(10, metrics);
 
         MatchmakingThread matchmakingThread =
                 new MatchmakingThread(
@@ -99,6 +99,7 @@ public class Main {
                         || schedulerService.hasActiveBattles()
         ) {
             Thread.sleep(1000);
+            System.out.println("Actives threads: " + Thread.activeCount());
         }
 
         System.out.println(
