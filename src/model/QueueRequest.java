@@ -33,7 +33,7 @@ public class QueueRequest {
 
     @Override
     public String toString(){
-        return "QueueRequisition{" +
+        return "QueueRequest{" +
                 "player: " + player +
                 ", battleType: " + battleType +
                 ", waitingTime: " + calculateWaitingTime() + "ms" +

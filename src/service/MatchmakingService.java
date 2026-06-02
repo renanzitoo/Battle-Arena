@@ -10,6 +10,7 @@ import java.util.Queue;
 
 
 public class MatchmakingService {
+    private final Object lock = new Object();
     private Queue<QueueRequest> rankedDuelQueue;
     private Queue<QueueRequest> casualDuelQueue;
     private Queue<QueueRequest> tournamentDuelQueue;
@@ -21,39 +22,43 @@ public class MatchmakingService {
     }
 
     public void addToQueue(QueueRequest request){
-        switch(request.getBattleType()){
-            case CASUAL_MATCH:
-                casualDuelQueue.add(request);
-                break;
+        synchronized(lock) {
+            switch(request.getBattleType()){
+                case CASUAL_MATCH:
+                    casualDuelQueue.add(request);
+                    break;
 
-            case RANKED_MATCH:
-                rankedDuelQueue.add(request);
-                break;
+                case RANKED_MATCH:
+                    rankedDuelQueue.add(request);
+                    break;
 
-            case TOURNAMENT_MATCH:
-                tournamentDuelQueue.add(request);
-                break;
+                case TOURNAMENT_MATCH:
+                    tournamentDuelQueue.add(request);
+                    break;
+            }
+
+            System.out.println("Player entered the queue: "+ request);
         }
-
-        System.out.println("Player entered the queue: "+ request);
     }
 
     public BattleRequest tryCreateBattle(BattleType battleType){
-        Queue<QueueRequest> selectedQueue = getQueueByBattleType(battleType);
+        synchronized(lock) {
+            Queue<QueueRequest> selectedQueue = getQueueByBattleType(battleType);
 
-        if (selectedQueue.size() >= 2) {
-            QueueRequest playerOne = selectedQueue.poll();
-            QueueRequest playerTwo = selectedQueue.poll();
+            if (selectedQueue.size() >= 2) {
+                QueueRequest playerOne = selectedQueue.poll();
+                QueueRequest playerTwo = selectedQueue.poll();
 
-            BattleRequest request =
-                    new BattleRequest(playerOne, playerTwo);
+                BattleRequest request =
+                        new BattleRequest(playerOne, playerTwo);
 
-            System.out.println("Battle Begin: " + request);
+                System.out.println("Battle Begin: " + request);
 
-            return request;
+                return request;
+            }
+
+            return null;
         }
-
-        return null;
     }
 
     private Queue<QueueRequest> getQueueByBattleType(BattleType battleType) {
@@ -73,9 +78,11 @@ public class MatchmakingService {
     }
 
     public void removeAbandonedRequests(){
-        removeAbandonedFromQueue(casualDuelQueue);
-        removeAbandonedFromQueue(rankedDuelQueue);
-        removeAbandonedFromQueue(tournamentDuelQueue);
+        synchronized(lock) {
+            removeAbandonedFromQueue(casualDuelQueue);
+            removeAbandonedFromQueue(rankedDuelQueue);
+            removeAbandonedFromQueue(tournamentDuelQueue);
+        }
     }
 
     public void removeAbandonedFromQueue(Queue<QueueRequest> queue){
@@ -92,9 +99,11 @@ public class MatchmakingService {
     }
 
     public void printQueuesStatus() {
-        System.out.println("\n===== Queue status =====");
-        System.out.println("Casual duels: " + casualDuelQueue.size());
-        System.out.println("Ranked: " + rankedDuelQueue.size());
-        System.out.println("Tournaments: " + tournamentDuelQueue.size());
+        synchronized(lock) {
+            System.out.println("\n===== Queue status =====");
+            System.out.println("Casual duels: " + casualDuelQueue.size());
+            System.out.println("Ranked: " + rankedDuelQueue.size());
+            System.out.println("Tournaments: " + tournamentDuelQueue.size());
+        }
     }
 }

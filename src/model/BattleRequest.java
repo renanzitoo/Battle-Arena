@@ -54,7 +54,7 @@ public class BattleRequest {
 
     @Override
     public String toString() {
-        return "BattleRequisition{" +
+        return "BattleRequest{" +
                 "playerOne=" + getPlayerOne().getName() +
                 ", playerTwo=" + getPlayerTwo().getName() +
                 ", battleType=" + battleType +
