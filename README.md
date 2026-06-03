@@ -41,7 +41,8 @@ Battle-Arena/
 ## 🚀 Como Executar
 
 ### Pré-requisitos
-- Java 8+
+- **Java 17+** (Java Development Kit - JDK)
+- **Maven 3.6+** (gerenciador de dependências e build)
 - IDE de sua preferência (IntelliJ IDEA, Eclipse, VS Code com extensões Java)
 
 ### Passos
@@ -52,28 +53,37 @@ Battle-Arena/
    cd Battle-Arena
    ```
 
-2. **Compile o projeto**
+2. **Execute a aplicação com Maven**
+   
+   Opção A - Executar com interface JavaFX (recomendado):
    ```bash
-   javac -d out src/**/*.java
+   mvn javafx:run
    ```
-
-3. **Execute a aplicação**
+   
+   Opção B - Executar via linha de comando:
    ```bash
-   java -cp out Main
+   mvn clean compile
+   mvn exec:java -Dexec.mainClass="app.Main"
+   ```
+   
+   Opção C - Criar JAR executável e rodar:
+   ```bash
+   mvn clean package
+   java -cp target/BattleArena-1.0-SNAPSHOT.jar app.Main
    ```
 
 ### Saída Esperada
 ```
-=== SIMULAÇÃO INICIADA ===
-[NOVO JOGADOR] Player_1 entrou na fila CASUAL_MATCH
-[NOVO JOGADOR] Player_2 entrou na fila CASUAL_MATCH
-Player entered the queue: QueueRequest{...}
-Battle Begin: BattleRequest{...}
-Battle started: Player_1 vs Player_2
-...
-=== ENCERRANDO SIMULAÇÃO ===
-=== SIMULAÇÃO FINALIZADA ===
+===== SYSTEM READY =====
+Commands: 'start' (generate players), 'stop' (pause generation), 'exit' (finish simulation)
 ```
+
+### Usando a Aplicação
+
+**Linhas de Comando Disponíveis:**
+- `start` - Inicia a geração automática de jogadores
+- `stop` - Para a geração de jogadores
+- `exit` - Finaliza a simulação
 
 ## 🔒 Thread Safety
 
@@ -111,5 +121,31 @@ O projeto implementa **sincronização robusta** para garantir consistência em 
 - **Abstração**: Serviços abstraem complexidade do sistema
 - **Enums**: Tipos de batalha e status
 - **Sincronização**: Locks e synchronized blocks
+
+## 🔧 Troubleshooting
+
+### Problema: "package model does not exist"
+**Solução**: Não compile apenas o `Main.java` com `javac`. Use Maven:
+```bash
+mvn clean compile
+mvn exec:java -Dexec.mainClass="app.Main"
+```
+
+### Problema: "Cannot find symbol" ao compilar
+**Solução**: Certifique-se de estar usando Maven e não tentando compilar manualmente. O Maven resolve todas as dependências automaticamente.
+
+### Problema: Compilação lenta na primeira vez
+**Esperado**: Na primeira execução, Maven baixa todas as dependências. Isso pode levar alguns minutos. Execuções posteriores serão mais rápidas.
+
+### Problema: JavaFX não funciona
+**Solução**: Verifique se você tem Java 17+ instalado:
+```bash
+java -version
+```
+
+Se precisar reinstalar Maven ou resolver problemas de dependências:
+```bash
+mvn clean install
+```
 
 **Battle Arena** - Sistema de Matchmaking e Agendamento de Batalhas 🎮⚔️
