@@ -18,13 +18,14 @@ public class BattleThread extends Thread{
             battle.start();
             System.out.println("Battle begin: " + battle);
 
-            Thread.sleep(
-                    battle.getRequest().getBattleType().getWaitingDurationInMs()
-            );
+            long baseDuration = battle.getRequest().getBattleType().getWaitingDurationInMs();
+            long randomDuration = baseDuration + (long) (Math.random() * (baseDuration * 0.5));
+
+            Thread.sleep(randomDuration);
 
             battle.finish();
 
-            System.out.println("Battle finished: " + battle);
+            System.out.println("Battle finished: " + battle + " (Duration: " + randomDuration + "ms)");
 
             schedulerService.releaseResources(battle);
         } catch (InterruptedException e) {
